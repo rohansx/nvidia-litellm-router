@@ -1,108 +1,63 @@
 # nvidia-litellm-router
 
-Auto-route across **31 free NVIDIA NIM models** with latency-based routing, automatic failover, and smart tier-based model selection. Zero cost.
+> Auto-route across **31 free NVIDIA NIM models** with latency-based routing, automatic failover, and smart tier-based model selection. Zero cost.
 
-## Features
+<p align="center">
+  <img src="demo.gif" alt="nvidia-litellm-router demo" width="720">
+</p>
 
-- Latency-based routing — automatically picks the **fastest** healthy model
-- **5 model tiers** — auto, coding, reasoning, general, fast
-- Automatic **failover** — rate limit hit → retries with backoff → routes to next model
-- **Cooldown** — bad model gets benched for 60s, auto-recovers
-- **API validation** — hardcoded models verified against live NVIDIA NIM API on each run
-- **Multi-provider** — optionally add Groq, Cerebras, OpenCode Zen for ~140 RPM combined
-- **OpenAI-compatible** — works with any OpenAI SDK (Python, Rust, TypeScript, Go, etc.)
+## Why
 
-## Requirements
+NVIDIA NIM gives you **31 free LLM endpoints** — DeepSeek V3.2, Llama 4, Qwen 3.5, Kimi K2, and more. But each model has rate limits (~40 RPM), and you have to pick which one to call.
 
-- Python 3.10+
-- A free [NVIDIA NIM API key](https://build.nvidia.com/settings/api-keys)
+This router solves both problems:
+- **Latency-based routing** picks the fastest model automatically
+- **Failover** retries on 429s and routes to the next model
+- **Tier routing** lets you target coding, reasoning, or fast models
+- Combined with Groq + Cerebras, you get **~140 RPM free**
 
-## Installation
-
-### From source
+## Quick Start
 
 ```bash
+# Clone
 git clone https://github.com/rohansx/nvidia-litellm-router.git
 cd nvidia-litellm-router
+
+# Install
 pip install -r requirements.txt
-```
 
-### Dependencies
-
-```
-litellm        # Proxy runtime
-openai         # Test client + Python usage
-requests       # NVIDIA API model discovery
-pyyaml         # Config generation
-```
-
-## Setup
-
-### 1. Get your free NVIDIA API key
-
-Go to [build.nvidia.com/settings/api-keys](https://build.nvidia.com/settings/api-keys) and create a free key.
-
-### 2. Configure environment
-
-```bash
+# Configure (get free key at https://build.nvidia.com/settings/api-keys)
 cp .env.example .env
-```
+# Edit .env → add NVIDIA_API_KEY=nvapi-xxxx
 
-Edit `.env` and add your key:
-
-```env
-NVIDIA_API_KEY=nvapi-xxxx
-```
-
-### 3. Generate config
-
-```bash
+# Generate config
 python setup.py
-```
 
-This will:
-- Fetch the model list from NVIDIA's API
-- Validate your curated models against the live API
-- Generate `config.yaml` with latency-based routing across all tiers
-- Write `models.json` with the final model registry
-
-### 4. Start the proxy
-
-```bash
+# Start proxy
 litellm --config config.yaml --port 4000
-```
 
-### 5. Send a request
-
-```bash
+# Use it
 curl http://localhost:4000/v1/chat/completions \
   -H "Authorization: Bearer sk-litellm-master" \
   -H "Content-Type: application/json" \
-  -d '{
-    "model": "nvidia-auto",
-    "messages": [{"role": "user", "content": "hello"}]
-  }'
+  -d '{"model": "nvidia-auto", "messages": [{"role": "user", "content": "hello"}]}'
 ```
 
-The response includes which model was selected in the `model` field.
+## Model Groups
 
-## Available Model Groups
-
-| Model name | Routes to | Use case |
-|---|---|---|
-| `nvidia-auto` | Fastest across ALL 31 models | Default, use this |
-| `nvidia-coding` | Kimi K2, Qwen3 Coder 480B, Devstral 2, Codestral, Qwen 2.5 Coder | Code generation, debugging |
-| `nvidia-reasoning` | DeepSeek V3.2, Qwen 3.5 397B, Nemotron Ultra 253B, Llama 405B | Hard problems, math, planning |
+| Group | Models | Best for |
+|-------|--------|----------|
+| `nvidia-auto` | All 31 models | Default — fastest wins |
+| `nvidia-coding` | Kimi K2, Qwen3 Coder 480B, Devstral 2 123B, Codestral, Qwen 2.5 Coder | Code gen, debugging |
+| `nvidia-reasoning` | DeepSeek V3.2, Qwen 3.5 397B, Nemotron Ultra 253B, Llama 405B | Math, planning, hard problems |
 | `nvidia-general` | Llama 4 Maverick/Scout, Mistral Large 2, DeepSeek V3.1, Mixtral | Balanced tasks |
-| `nvidia-fast` | Phi 4 Mini, DeepSeek R1 distills, Mistral Small, Gemma 2 | Quick responses, high throughput |
-| `<model-name>` | Specific model directly | e.g. `kimi-k2-instruct`, `deepseek-v3.2` |
-
-### Full Model List (31 models)
+| `nvidia-fast` | Phi 4 Mini, DeepSeek R1 distills, Mistral Small, Gemma 2 | Low latency, high throughput |
+| `<model-name>` | Any model directly | e.g. `kimi-k2-instruct` |
 
 <details>
-<summary>Click to expand</summary>
+<summary><strong>Full model list (31 models)</strong></summary>
 
-**Reasoning (6)**
+### Reasoning (6)
 | Model | ID |
 |---|---|
 | DeepSeek V3.2 | `deepseek-ai/deepseek-v3.2` |
@@ -112,7 +67,7 @@ The response includes which model was selected in the `model` field.
 | Qwen 3.5 397B | `qwen/qwen3.5-397b-a17b` |
 | Qwen 3.5 122B | `qwen/qwen3.5-122b-a10b` |
 
-**Coding (5)**
+### Coding (5)
 | Model | ID |
 |---|---|
 | Kimi K2 | `moonshotai/kimi-k2-instruct` |
@@ -121,7 +76,7 @@ The response includes which model was selected in the `model` field.
 | Devstral 2 123B | `mistralai/devstral-2-123b-instruct-2512` |
 | Codestral 22B | `mistralai/codestral-22b-instruct-v0.1` |
 
-**General (11)**
+### General (11)
 | Model | ID |
 |---|---|
 | DeepSeek V3.1 | `deepseek-ai/deepseek-v3.1` |
@@ -136,7 +91,7 @@ The response includes which model was selected in the `model` field.
 | Mixtral 8x22B | `mistralai/mixtral-8x22b-instruct-v0.1` |
 | Mistral Medium 3 | `mistralai/mistral-medium-3-instruct` |
 
-**Fast (9)**
+### Fast (9)
 | Model | ID |
 |---|---|
 | Nemotron Nano 8B | `nvidia/llama-3.1-nemotron-nano-8b-v1` |
@@ -151,6 +106,34 @@ The response includes which model was selected in the `model` field.
 
 </details>
 
+## How It Works
+
+```
+Your request (model: "nvidia-auto")
+    │
+    ▼
+LiteLLM Proxy (localhost:4000)
+    │
+    ├── Measures latency of all 31 deployments
+    ├── Picks the fastest healthy model
+    ├── 429 / error? → retry 3x with backoff
+    ├── Still failing? → failover to next model
+    ├── Model slow? → deprioritized automatically
+    ├── Model down? → 60s cooldown, auto-recovers
+    │
+    ▼
+Response (model field shows which was picked)
+```
+
+### Fallback Chains
+
+```
+nvidia-coding    → nvidia-reasoning → nvidia-general
+nvidia-reasoning → nvidia-general   → nvidia-coding
+nvidia-general   → nvidia-fast      → nvidia-reasoning
+nvidia-fast      → nvidia-general
+```
+
 ## Usage Examples
 
 ### Python
@@ -163,45 +146,13 @@ client = openai.OpenAI(
     api_key="sk-litellm-master",
 )
 
-# Auto-route to fastest model
 resp = client.chat.completions.create(
-    model="nvidia-auto",
+    model="nvidia-auto",  # or nvidia-coding, nvidia-reasoning, etc.
     messages=[{"role": "user", "content": "hello"}],
 )
 print(resp.choices[0].message.content)
 print(f"Routed to: {resp.model}")
-
-# Target a specific tier
-resp = client.chat.completions.create(
-    model="nvidia-coding",
-    messages=[{"role": "user", "content": "Write a Python quicksort"}],
-)
 ```
-
-### Rust (async-openai)
-
-```rust
-// Cargo.toml: async-openai = "0.25", tokio = { version = "1", features = ["full"] }
-
-let config = OpenAIConfig::new()
-    .with_api_key("sk-litellm-master")
-    .with_api_base("http://localhost:4000/v1");
-let client = Client::with_config(config);
-
-let request = CreateChatCompletionRequestArgs::default()
-    .model("nvidia-auto")
-    .messages(vec![
-        ChatCompletionRequestUserMessageArgs::default()
-            .content("hello")
-            .build()?
-            .into(),
-    ])
-    .build()?;
-
-let response = client.chat().create(request).await?;
-```
-
-See [`examples/`](examples/) for full working examples.
 
 ### TypeScript / Node.js
 
@@ -214,69 +165,63 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "nvidia-auto",
-  messages: [{ role: "user", content: "hello" }],
+  model: "nvidia-coding",
+  messages: [{ role: "user", content: "Write a quicksort in Python" }],
 });
 ```
+
+### Rust
+
+```rust
+let config = OpenAIConfig::new()
+    .with_api_key("sk-litellm-master")
+    .with_api_base("http://localhost:4000/v1");
+let client = Client::with_config(config);
+
+let request = CreateChatCompletionRequestArgs::default()
+    .model("nvidia-auto")
+    .messages(vec![...])
+    .build()?;
+```
+
+See [`examples/`](examples/) for full working examples.
 
 ### curl
 
 ```bash
-# Auto-route
+# Auto-route to fastest model
 curl http://localhost:4000/v1/chat/completions \
   -H "Authorization: Bearer sk-litellm-master" \
   -H "Content-Type: application/json" \
   -d '{"model": "nvidia-auto", "messages": [{"role": "user", "content": "hello"}]}'
 
-# Target coding models
+# Target coding models only
 curl http://localhost:4000/v1/chat/completions \
   -H "Authorization: Bearer sk-litellm-master" \
   -H "Content-Type: application/json" \
-  -d '{"model": "nvidia-coding", "messages": [{"role": "user", "content": "Write a binary search in Go"}]}'
-
-# Use a specific model
-curl http://localhost:4000/v1/chat/completions \
-  -H "Authorization: Bearer sk-litellm-master" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "kimi-k2-instruct", "messages": [{"role": "user", "content": "hello"}]}'
+  -d '{"model": "nvidia-coding", "messages": [{"role": "user", "content": "Write binary search in Go"}]}'
 ```
 
-## How Routing Works
+## Extra Free Providers
 
-```
-Your request → LiteLLM proxy (localhost:4000)
-                    │
-                    ├─ Measures latency of all deployments
-                    ├─ Picks fastest healthy model
-                    ├─ If 429/error → retry with backoff (3 retries)
-                    ├─ If still failing → failover to next model
-                    ├─ If model slow → deprioritized automatically
-                    ├─ If model down → 60s cooldown, then auto-recovers
-                    └─ Response back to you
-```
-
-### Fallback Chains
-
-When all models in a tier fail, requests fall through to the next tier:
-
-```
-nvidia-coding    → nvidia-reasoning → nvidia-general
-nvidia-reasoning → nvidia-general   → nvidia-coding
-nvidia-general   → nvidia-fast      → nvidia-reasoning
-nvidia-fast      → nvidia-general
-```
-
-## Add More Free Providers (optional)
-
-Add extra API keys to `.env` for more failover coverage:
+Add more API keys for even more throughput:
 
 ```env
-OPENCODE_API_KEY=xxx    # OpenCode Zen: Big Pickle, MiMo, MiniMax free
+# In .env
+OPENCODE_API_KEY=xxx    # OpenCode Zen: Big Pickle, MiMo, MiniMax
 GROQ_API_KEY=xxx        # Groq: Llama 70B, Mixtral (30 RPM)
-CEREBRAS_API_KEY=xxx    # Cerebras: Llama 70B (ultra-fast inference)
+CEREBRAS_API_KEY=xxx    # Cerebras: Llama 70B (ultra-fast)
 ```
 
-Then re-run `python setup.py` to regenerate the config. Bonus models join the `nvidia-auto` pool.
+Then `python setup.py` again — bonus models join the `nvidia-auto` pool.
+
+| Provider | RPM | Models |
+|----------|-----|--------|
+| NVIDIA NIM | ~40 | 31 |
+| OpenCode Zen | ~40/hr | 4 |
+| Groq | 30 | 2 |
+| Cerebras | 30 | 1 |
+| **Combined** | **~140** | **38** |
 
 ## Docker
 
@@ -296,27 +241,16 @@ docker run -d \
 ## Testing
 
 ```bash
-# Start proxy first
-litellm --config config.yaml --port 4000
-
-# Run smoke tests (tests all 5 tiers)
+# With proxy running:
 python test_proxy.py
 ```
 
-## Rate Limits
+Tests all 5 tiers, reports latency and which model was selected.
 
-| Provider | RPM | Notes |
-|----------|-----|-------|
-| NVIDIA NIM | ~40 | 1000 free credits, request more at build.nvidia.com |
-| OpenCode Zen | ~40/hr | Free tier models |
-| Groq | 30 | 14.4k tokens/min |
-| Cerebras | 30 | 1M tokens/day |
-| **Combined** | **~140** | **31+ models** |
+## Configuration
 
-## Configuration Reference
-
-| Environment Variable | Required | Description |
-|---------------------|----------|-------------|
+| Variable | Required | Description |
+|----------|----------|-------------|
 | `NVIDIA_API_KEY` | Yes | Free at [build.nvidia.com](https://build.nvidia.com/settings/api-keys) |
 | `OPENCODE_API_KEY` | No | OpenCode Zen free models |
 | `GROQ_API_KEY` | No | Groq free tier |
@@ -328,17 +262,16 @@ python test_proxy.py
 ```
 nvidia-litellm-router/
 ├── setup.py              # Config generator (run this first)
-├── config.yaml           # Generated LiteLLM config (gitignored)
-├── models.json           # Generated model registry (gitignored)
-├── test_proxy.py         # Smoke tests for running proxy
+├── test_proxy.py         # Smoke tests
+├── demo.sh               # Demo recording script
 ├── requirements.txt      # Python dependencies
-├── .env.example          # Environment variable template
+├── .env.example          # Env var template
 ├── examples/
-│   ├── python_usage.py   # Python openai SDK example
-│   └── rust_usage.rs     # Rust async-openai example
+│   ├── python_usage.py
+│   └── rust_usage.rs
 └── docs/
-    ├── architecture.md   # System design and data flow
-    ├── tech-specs.md     # Config schema, routing details
+    ├── architecture.md   # System design
+    ├── tech-specs.md     # Technical specs
     ├── plan.md           # Implementation plan
     └── phases.md         # Phased rollout
 ```
