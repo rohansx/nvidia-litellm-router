@@ -27,8 +27,10 @@ NVIDIA_API_BASE = "https://integrate.api.nvidia.com/v1"
 
 KNOWN_FREE_CHAT_MODELS = [
     # === Top Tier (Frontier-class) ===
-    {"id": "deepseek-ai/deepseek-r1", "name": "DeepSeek R1", "tier": "reasoning", "ctx": 128000},
-    {"id": "deepseek-ai/deepseek-v3-0324", "name": "DeepSeek V3", "tier": "general", "ctx": 128000},
+    {"id": "deepseek-ai/deepseek-v3.2", "name": "DeepSeek V3.2", "tier": "reasoning", "ctx": 128000},
+    {"id": "deepseek-ai/deepseek-v3.1", "name": "DeepSeek V3.1", "tier": "general", "ctx": 128000},
+    {"id": "deepseek-ai/deepseek-v3.1-terminus", "name": "DeepSeek V3.1 Terminus", "tier": "general", "ctx": 128000},
+    {"id": "deepseek-ai/deepseek-r1-distill-qwen-32b", "name": "DeepSeek R1 Distill 32B", "tier": "reasoning", "ctx": 128000},
     {"id": "nvidia/llama-3.1-nemotron-ultra-253b-v1", "name": "Nemotron Ultra 253B", "tier": "reasoning", "ctx": 131072},
     {"id": "nvidia/llama-3.3-nemotron-super-49b-v1", "name": "Nemotron Super 49B", "tier": "general", "ctx": 131072},
     {"id": "nvidia/llama-3.1-nemotron-nano-8b-v1", "name": "Nemotron Nano 8B", "tier": "fast", "ctx": 131072},
@@ -38,25 +40,34 @@ KNOWN_FREE_CHAT_MODELS = [
     {"id": "meta/llama-3.1-8b-instruct", "name": "Llama 3.1 8B", "tier": "fast", "ctx": 131072},
     {"id": "meta/llama-3.1-70b-instruct", "name": "Llama 3.1 70B", "tier": "general", "ctx": 131072},
     {"id": "meta/llama-3.1-405b-instruct", "name": "Llama 3.1 405B", "tier": "reasoning", "ctx": 131072},
+    {"id": "meta/llama-4-maverick-17b-128e-instruct", "name": "Llama 4 Maverick", "tier": "general", "ctx": 131072},
+    {"id": "meta/llama-4-scout-17b-16e-instruct", "name": "Llama 4 Scout", "tier": "general", "ctx": 131072},
 
     # === Coding Specialists ===
-    {"id": "moonshotai/kimi-k2-instruct", "name": "Kimi K2.5", "tier": "coding", "ctx": 131072},
-    {"id": "qwen/qwen3-235b-instruct", "name": "Qwen3 235B", "tier": "reasoning", "ctx": 131072},
+    {"id": "moonshotai/kimi-k2-instruct", "name": "Kimi K2", "tier": "coding", "ctx": 131072},
+    {"id": "qwen/qwen3-coder-480b-a35b-instruct", "name": "Qwen3 Coder 480B", "tier": "coding", "ctx": 131072},
     {"id": "qwen/qwen2.5-coder-32b-instruct", "name": "Qwen 2.5 Coder 32B", "tier": "coding", "ctx": 32768},
-    {"id": "qwen/qwen2.5-72b-instruct", "name": "Qwen 2.5 72B", "tier": "general", "ctx": 131072},
+    {"id": "mistralai/devstral-2-123b-instruct-2512", "name": "Devstral 2 123B", "tier": "coding", "ctx": 131072},
+    {"id": "mistralai/codestral-22b-instruct-v0.1", "name": "Codestral 22B", "tier": "coding", "ctx": 32768},
 
-    # === Fast / Efficient ===
+    # === Reasoning / Large ===
+    {"id": "qwen/qwen3.5-397b-a17b", "name": "Qwen 3.5 397B", "tier": "reasoning", "ctx": 131072},
+    {"id": "qwen/qwen3.5-122b-a10b", "name": "Qwen 3.5 122B", "tier": "reasoning", "ctx": 131072},
+    {"id": "qwen/qwen3-next-80b-a3b-instruct", "name": "Qwen3 Next 80B", "tier": "general", "ctx": 131072},
+
+    # === General ===
     {"id": "mistralai/mistral-large-2-instruct", "name": "Mistral Large 2", "tier": "general", "ctx": 131072},
     {"id": "mistralai/mixtral-8x22b-instruct-v0.1", "name": "Mixtral 8x22B", "tier": "general", "ctx": 65536},
-    {"id": "mistralai/mistral-small-24b-instruct-2501", "name": "Mistral Small 24B", "tier": "fast", "ctx": 32768},
+    {"id": "mistralai/mistral-medium-3-instruct", "name": "Mistral Medium 3", "tier": "general", "ctx": 131072},
+
+    # === Fast / Efficient ===
+    {"id": "mistralai/mistral-small-24b-instruct", "name": "Mistral Small 24B", "tier": "fast", "ctx": 32768},
     {"id": "google/gemma-2-27b-it", "name": "Gemma 2 27B", "tier": "fast", "ctx": 8192},
-    {"id": "microsoft/phi-4", "name": "Phi 4", "tier": "fast", "ctx": 16384},
-
-    # === Reasoning ===
-    {"id": "nvidia/deepseek-r1-fp4", "name": "DeepSeek R1 FP4 (NVIDIA)", "tier": "reasoning", "ctx": 128000},
-
-    # === MiniMax / GLM ===
-    {"id": "thudm/glm-4-9b-chat", "name": "GLM-4 9B", "tier": "fast", "ctx": 131072},
+    {"id": "microsoft/phi-4-mini-instruct", "name": "Phi 4 Mini", "tier": "fast", "ctx": 16384},
+    {"id": "microsoft/phi-4-mini-flash-reasoning", "name": "Phi 4 Mini Flash", "tier": "fast", "ctx": 16384},
+    {"id": "deepseek-ai/deepseek-r1-distill-qwen-14b", "name": "DeepSeek R1 Distill 14B", "tier": "fast", "ctx": 128000},
+    {"id": "deepseek-ai/deepseek-r1-distill-qwen-7b", "name": "DeepSeek R1 Distill 7B", "tier": "fast", "ctx": 128000},
+    {"id": "deepseek-ai/deepseek-r1-distill-llama-8b", "name": "DeepSeek R1 Distill Llama 8B", "tier": "fast", "ctx": 128000},
 ]
 
 
@@ -83,14 +94,38 @@ def discover_nvidia_models(api_key: str) -> list[dict]:
 
 
 def filter_chat_models(api_models: list[dict]) -> list[str]:
-    """Filter API models to only chat-capable LLMs."""
+    """Filter API models to only chat-capable LLMs.
+
+    Conservative filter: only include models whose ID contains a known
+    chat-model keyword (instruct, chat, coder, etc.) AND doesn't match
+    any skip keyword. This avoids polluting the pool with embedding,
+    vision, parse, or legacy models.
+    """
     chat_ids = set()
+    skip_keywords = [
+        "embed", "rerank", "vlm", "audio", "image", "video", "vision",
+        "neva", "fuyu", "kosmos", "sdxl", "stable-diffusion",
+        "grounding", "nv-rerankqa", "parakeet", "canary", "parse",
+        "bge-", "nv-clip", "reward", "safety", "guard", "judge",
+        "chatqa", "translate", "riva-", "gemma-2b", "nemotron-4-mini-hindi",
+    ]
+    # Only include from trusted orgs with chat-capable naming
+    trusted_orgs = [
+        "meta/", "nvidia/", "deepseek-ai/", "qwen/", "mistralai/",
+        "google/", "microsoft/", "moonshotai/", "thudm/",
+    ]
+    chat_keywords = [
+        "instruct", "chat", "coder", "deepseek-r1", "deepseek-v3",
+        "phi-4", "gemma-2", "mixtral", "kimi-k2",
+    ]
     for m in api_models:
         mid = m.get("id", "")
-        skip_keywords = ["embed", "rerank", "vlm", "audio", "image", "video",
-                         "neva", "fuyu", "kosmos", "sdxl", "stable-diffusion",
-                         "grounding", "nv-rerankqa", "parakeet", "canary"]
-        if any(kw in mid.lower() for kw in skip_keywords):
+        mid_lower = mid.lower()
+        if any(kw in mid_lower for kw in skip_keywords):
+            continue
+        if not any(mid_lower.startswith(org) for org in trusted_orgs):
+            continue
+        if not any(kw in mid_lower for kw in chat_keywords):
             continue
         chat_ids.add(mid)
     return list(chat_ids)
@@ -241,24 +276,26 @@ def main():
         print("Get your free key: https://build.nvidia.com/settings/api-keys")
         print("=" * 60)
 
-    # Discover models
+    # Discover models from API
     api_models = discover_nvidia_models(api_key) if api_key else []
-    discovered_ids = filter_chat_models(api_models) if api_models else []
+    all_api_ids = {m.get("id", "") for m in api_models}
 
-    # Merge discovered with known
-    known_ids = {m["id"] for m in KNOWN_FREE_CHAT_MODELS}
-    final_models = list(KNOWN_FREE_CHAT_MODELS)
+    # Start with known curated models — validate they still exist on API
+    if all_api_ids:
+        final_models = []
+        for m in KNOWN_FREE_CHAT_MODELS:
+            if m["id"] in all_api_ids:
+                final_models.append(m)
+            else:
+                print(f"[!] Removed (not on API): {m['id']}")
+        if not final_models:
+            print("[!] No hardcoded models matched API — using full hardcoded list")
+            final_models = list(KNOWN_FREE_CHAT_MODELS)
+    else:
+        final_models = list(KNOWN_FREE_CHAT_MODELS)
 
     new_count = 0
-    for mid in discovered_ids:
-        if mid not in known_ids:
-            final_models.append({
-                "id": mid,
-                "name": mid.split("/")[-1],
-                "tier": "general",
-                "ctx": 131072,
-            })
-            new_count += 1
+    # Don't merge discovered-only models — they may not be free or chat-capable
 
     if new_count:
         print(f"[+] Discovered {new_count} additional models not in hardcoded list")
